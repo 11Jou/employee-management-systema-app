@@ -8,7 +8,7 @@ class CustomObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token['email'] = user.email
         token['name'] = user.name
-        token['role'] = 'Admin' if user.is_superuser else ("Manager" if user.is_staff else "Employee")
+        token['role'] = user.role  # Use custom role field
         return token
     
     def validate(self, attrs):

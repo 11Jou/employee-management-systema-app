@@ -12,13 +12,13 @@ class UserManager(BaseUserManager):
             raise ValueError('Invalid email address')
     
     
-    def create_user(self, email, name, password=None, **extra_fields):
+    def create_user(self, email, name, role='employee', password=None, **extra_fields):
         if email:
             email = self.normalize_email(email)
             self.validate_email(email)
         else:
             raise ValueError('The Email field must be set')
-        user = self.model(email=email, name=name, **extra_fields)
+        user = self.model(email=email, name=name, role=role, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -26,14 +26,16 @@ class UserManager(BaseUserManager):
     
     
     def create_superuser(self, email, name, password, **extra_fields):
+        """
+        Create a superuser with admin role.
+        Sets is_staff and is_superuser for Django admin access.
+        """
         extra_fields.setdefault("is_active", True)
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must be admin")
+        extra_fields.setdefault("is_staff", True)  # Required for Django admin access
+        extra_fields.setdefault("is_superuser", True)  # Required for Django admin access
+        extra_fields.setdefault("role", "admin")  # Set custom role to admin
         
         user = self.create_user(email, name, password, **extra_fields)
-        user.save(using = self._db)
+        user.save(using=self._db)
         
         return user        

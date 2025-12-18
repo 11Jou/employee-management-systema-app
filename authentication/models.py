@@ -3,11 +3,17 @@ from django.db import models
 from .manager import UserManager
 
 
-class User(AbstractUser):
-    username = None  # remove username field
+UserRole = [
+    ('admin', 'Admin'),
+    ('manager', 'Manager'),
+    ('employee', 'Employee'),
+]
 
+class User(AbstractUser):
+    username = None 
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=255)
+    role = models.CharField(max_length=255, choices=UserRole, default='employee')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']

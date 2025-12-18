@@ -133,3 +133,4 @@ def update_company_on_department_delete(sender, instance, **kwargs):
     if instance.company:
         instance.company.number_of_department = instance.company.calculate_number_of_department()
         instance.company.save(update_fields=['number_of_department'])
+        
