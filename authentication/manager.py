@@ -31,11 +31,10 @@ class UserManager(BaseUserManager):
         Sets is_staff and is_superuser for Django admin access.
         """
         extra_fields.setdefault("is_active", True)
-        extra_fields.setdefault("is_staff", True)  # Required for Django admin access
-        extra_fields.setdefault("is_superuser", True)  # Required for Django admin access
-        extra_fields.setdefault("role", "admin")  # Set custom role to admin
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True) 
         
-        user = self.create_user(email, name, password, **extra_fields)
+        user = self.create_user(email, name, role='admin', password=password, **extra_fields)
         user.save(using=self._db)
         
-        return user        
+        return user
