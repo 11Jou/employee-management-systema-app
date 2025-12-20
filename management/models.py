@@ -54,10 +54,11 @@ EmployeeStatus = [
 
 
 class Employee(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='employees')
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='employees')
     status = models.CharField(max_length=255, choices=EmployeeStatus, default='application_received')
+    employee_name = models.CharField(max_length=255, blank=True, null=True)
+    employee_email = models.EmailField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=17, validators=[RegexValidator(regex=r'^\+?1?\d{8,15}$')])
     address = models.TextField()
     designation = models.CharField(max_length=255)
@@ -67,11 +68,10 @@ class Employee(models.Model):
     class Meta:
         verbose_name = 'Employee'
         verbose_name_plural = 'Employees'
-    
-    
-    
+        
     def __str__(self):
-        return self.user.email
+        return self.employee_name
+    
     
     def calculate_day_employee(self):
         if self.hired_date:
