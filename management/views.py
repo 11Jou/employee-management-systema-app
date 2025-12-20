@@ -7,6 +7,7 @@ from project.permission import IsManagerOrAdmin
 from .serializers import *
 from authentication.models import User
 from django.db import transaction
+from .utils import CustomResponse
 
 
 class CompanyListView(APIView):
@@ -19,16 +20,19 @@ class CompanyListView(APIView):
             try:
                 company = Company.objects.get(id=pk)
                 serializer = self.serializer_class(company, context={'request': request})
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Company.DoesNotExist:
-                return Response(
-                    {'error': 'Company not found'},
-                    status=status.HTTP_404_NOT_FOUND
+                return CustomResponse.success(
+                    data=serializer.data,
+                    message="Company retrieved successfully"
                 )
+            except Company.DoesNotExist:
+                return CustomResponse.not_found(message="Company not found")
         else:
             companies = Company.objects.all()
             serializer = self.serializer_class(companies, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return CustomResponse.success(
+                data=serializer.data,
+                message="Companies retrieved successfully"
+            )
         
         
 class DepartmentListView(APIView):
@@ -41,16 +45,19 @@ class DepartmentListView(APIView):
             try:
                 department = Department.objects.get(id=pk)
                 serializer = self.serializer_class(department, context={'request': request})
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Department.DoesNotExist:
-                return Response(
-                    {'error': 'Department not found'},
-                    status=status.HTTP_404_NOT_FOUND
+                return CustomResponse.success(
+                    data=serializer.data,
+                    message="Department retrieved successfully"
                 )
+            except Department.DoesNotExist:
+                return CustomResponse.not_found(message="Department not found")
         else:
             departments = Department.objects.all()
             serializer = self.serializer_class(departments, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return CustomResponse.success(
+                data=serializer.data,
+                message="Departments retrieved successfully"
+            )
         
         
 class EmployeeListView(APIView):
@@ -63,16 +70,19 @@ class EmployeeListView(APIView):
             try:
                 employee = Employee.objects.get(id=pk)
                 serializer = self.serializer_class(employee, context={'request': request})
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except Employee.DoesNotExist:
-                return Response(
-                    {'error': 'Employee not found'},
-                    status=status.HTTP_404_NOT_FOUND
+                return CustomResponse.success(
+                    data=serializer.data,
+                    message="Employee retrieved successfully"
                 )
+            except Employee.DoesNotExist:
+                return CustomResponse.not_found(message="Employee not found")
         else:
             employees = Employee.objects.all()
             serializer = self.serializer_class(employees, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return CustomResponse.success(
+                data=serializer.data,
+                message="Employees retrieved successfully"
+            )
         
         
 
@@ -85,8 +95,14 @@ class EmployeeCreateView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return CustomResponse.created(
+                data=serializer.data,
+                message="Employee created successfully"
+            )
+        return CustomResponse.error(
+            errors=serializer.errors,
+            message="Failed to create employee"
+        )
         
         
 
@@ -102,13 +118,16 @@ class EmployeeUpdateView(APIView):
                 serializer = self.serializer_class(employee, data=request.data, partial=True)
                 if serializer.is_valid():
                     serializer.save()
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    return CustomResponse.success(
+                        data=serializer.data,
+                        message="Employee updated successfully"
+                    )
+                return CustomResponse.error(
+                    errors=serializer.errors,
+                    message="Failed to update employee"
+                )
         except Employee.DoesNotExist:
-            return Response(
-                {'error': 'Employee not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return CustomResponse.not_found(message="Employee not found")
     
     
 class EmployeeDeleteView(APIView):
@@ -121,9 +140,6 @@ class EmployeeDeleteView(APIView):
             with transaction.atomic():
                 employee = Employee.objects.select_for_update().get(id=pk)
                 employee.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                return CustomResponse.no_content(message="Employee deleted successfully")
         except Employee.DoesNotExist:
-            return Response(
-                {'error': 'Employee not found'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            return CustomResponse.not_found(message="Employee not found")
