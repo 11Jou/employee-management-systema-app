@@ -7,7 +7,8 @@ from project.permission import IsManagerOrAdmin
 from .serializers import *
 from authentication.models import User
 from django.db import transaction
-from .utils import CustomResponse
+from core.utils import CustomResponse
+from core.swagger_docs import employee_create_schema, employee_update_schema
 
 
 class CompanyListView(APIView):
@@ -91,6 +92,7 @@ class EmployeeCreateView(APIView):
     permission_classes = [IsAuthenticated, IsManagerOrAdmin]
     serializer_class = EmployeeSerializer
     
+    @employee_create_schema
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -111,6 +113,7 @@ class EmployeeUpdateView(APIView):
     permission_classes = [IsAuthenticated, IsManagerOrAdmin]
     serializer_class = EmployeeSerializer
     
+    @employee_update_schema
     def patch(self, request, pk):
         try:
             with transaction.atomic():
