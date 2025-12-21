@@ -1,6 +1,4 @@
-import { House, ChartNoAxesColumnDecreasing , 
-    Headset, SquareArrowDownRight, Touchpad, 
-    ArrowUpDown, Tag, LogOut, Menu} from 'lucide-react';
+import { House, Building2 ,LayoutPanelTop,  LogOut, Menu, User} from 'lucide-react';
     import { AuthService } from '../../services/HttpClient';
   
   import Link from 'next/link';
@@ -21,12 +19,10 @@ import { House, ChartNoAxesColumnDecreasing ,
   export default function SideBar({ isOpen, onToggle, isMobile = false }: SideBarProps) {
     const menuItems: MenuItem[] = [
       { icon: House, title: "Dashboard", href: "/dashboard" },
-      { icon: ChartNoAxesColumnDecreasing , title: "Companies", href: "/dashboard/companies" },
-      { icon: Touchpad, title: "Orders", href: "/dashboard/orders" },
-      { icon: Headset, title: "Customer Support", href: "/dashboard/customer-support" },
-      { icon: SquareArrowDownRight, title: "Payments", href: "/dashboard/payments" },
-      { icon: ArrowUpDown, title: "Vendor Control Center" , href: "/dashboard/vendor-control-center" },
-      { icon: Tag, title: "Promocodes" , href: "/dashboard/promocodes" },
+      { icon: Building2 , title: "Companies", href: "/dashboard/companies" },
+      { icon: LayoutPanelTop, title: "Departments", href: "/dashboard/departments" },
+      { icon: User, title: "Employees", href: "/dashboard/employees" },
+
     ];
   
     return (
@@ -34,7 +30,7 @@ import { House, ChartNoAxesColumnDecreasing ,
         isMobile 
           ? isOpen ? 'translate-x-0' : '-translate-x-full' 
           : ''
-      } ${isOpen ? 'w-64' : 'w-20'} h-screen bg-[#1A2530] rounded-r-l flex flex-col fixed pt-8 transition-all duration-300 ${
+      } ${isOpen ? 'w-64' : 'w-20'} h-screen bg-[#225199] rounded-r-l flex flex-col fixed pt-8 transition-all duration-300 ${
         isMobile ? 'z-40' : 'z-10'
       }`}>
   
