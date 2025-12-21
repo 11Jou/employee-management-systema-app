@@ -3,6 +3,8 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 // Token storage keys
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
+const USER_NAME_KEY = "user_name";
+const USER_ROLE_KEY = "user_role";
 
 // Create axios instance
 export const HttpClient = axios.create({
@@ -39,6 +41,29 @@ export const TokenManager = {
         if (typeof window !== "undefined") {
             localStorage.removeItem(ACCESS_TOKEN_KEY);
             localStorage.removeItem(REFRESH_TOKEN_KEY);
+            localStorage.removeItem(USER_NAME_KEY);
+            localStorage.removeItem(USER_ROLE_KEY);
+        }
+    },
+
+    getUserName: (): string | null => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem(USER_NAME_KEY);
+        }
+        return null;
+    },
+
+    getUserRole: (): string | null => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem(USER_ROLE_KEY);
+        }
+        return null;
+    },
+
+    setUserInfo: (name: string, role: string): void => {
+        if (typeof window !== "undefined") {
+            localStorage.setItem(USER_NAME_KEY, name);
+            localStorage.setItem(USER_ROLE_KEY, role);
         }
     },
 };
@@ -176,16 +201,23 @@ export const AuthService = {
                 }
             );
 
-            const { access, refresh } = response.data;
+            const { access, refresh, name, role } = response.data;
 
             // Store tokens
             TokenManager.setTokens(access, refresh);
+
+            // Store user info (name and role) if available
+            if (name && role) {
+                TokenManager.setUserInfo(name, role);
+            }
 
             return {
                 success: true,
                 data: {
                     access,
                     refresh,
+                    name,
+                    role,
                 },
             };
         } catch (error) {
@@ -264,6 +296,22 @@ export const AuthService = {
      */
     isAuthenticated: (): boolean => {
         return !!TokenManager.getAccessToken();
+    },
+
+    /**
+     * Get user name from storage
+     * @returns string | null
+     */
+    getUserName: (): string | null => {
+        return TokenManager.getUserName();
+    },
+
+    /**
+     * Get user role from storage
+     * @returns string | null
+     */
+    getUserRole: (): string | null => {
+        return TokenManager.getUserRole();
     },
 };
 

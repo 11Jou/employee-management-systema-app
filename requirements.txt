@@ -14,3 +14,4 @@ sqlparse==0.5.4
 tzdata==2025.3
 uritemplate==4.2.0
 setuptools==75.1.0
+django-cors-headers==4.7.0
