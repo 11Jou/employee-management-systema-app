@@ -35,7 +35,7 @@ export default function ConfirmDelete({
 
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4 relative z-10">
-                <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-[popUp_0.3s_ease-out]">
+                <div className="relative bg-gray-100 rounded-lg shadow-xl max-w-md w-full p-6 animate-[popUp_0.3s_ease-out]">
                     {/* Title */}
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                         {title}
