@@ -2,13 +2,13 @@ from django.db import models
 from authentication.models import User
 from datetime import date
 from django.core.validators import RegexValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
-    number_of_department = models.IntegerField(default=0)
-    number_of_employee = models.IntegerField(default=0)
     
     
     class Meta:
@@ -19,18 +19,11 @@ class Company(models.Model):
     def __str__(self):
         return self.name
     
-    def calculate_number_of_department(self):
-        return self.departments.count()
-    
-    def calculate_number_of_employee(self):
-        return self.employees.count()
-    
     
 
 class Department(models.Model):
     name = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='departments')
-    number_of_employee = models.IntegerField(default=0)
     
     class Meta:
         verbose_name = 'Department'
@@ -38,9 +31,6 @@ class Department(models.Model):
     
     def __str__(self):
         return self.name
-    
-    def calculate_number_of_employee(self):
-        return self.employees.count()
     
     
 
@@ -77,4 +67,27 @@ class Employee(models.Model):
         if self.hired_date:
             return (date.today() - self.hired_date).days
         return 0
+    
+    
+@receiver(post_save, sender=Employee)
+def update_employee_fields(sender, instance, created, **kwargs):
+    updated_fields = []
+
+    if instance.status == 'hired' and instance.hired_date is None:
+        instance.hired_date = date.today()
+        updated_fields.append('hired_date')
+
+    if instance.hired_date:
+        calculated_days = instance.calculate_day_employee()
+        if instance.day_employee != calculated_days:
+            instance.day_employee = calculated_days
+            updated_fields.append('day_employee')
+
+    if updated_fields:
+        instance.save(update_fields=updated_fields)
+        
+        
+        
+        
+        
         

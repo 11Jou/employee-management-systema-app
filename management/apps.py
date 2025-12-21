@@ -5,4 +5,4 @@ class ManagementConfig(AppConfig):
     name = 'management'
     
     def ready(self):
-        import management.signals
+        import management.models

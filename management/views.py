@@ -111,7 +111,7 @@ class EmployeeCreateView(APIView):
 class EmployeeUpdateView(APIView):
     """View for updating employees - accessible by Manager or Admin"""
     permission_classes = [IsAuthenticated, IsManagerOrAdmin]
-    serializer_class = EmployeeSerializer
+    serializer_class = EmployeeUpdateSerializer
     
     @employee_update_schema
     def patch(self, request, pk):
@@ -125,6 +125,7 @@ class EmployeeUpdateView(APIView):
                         data=serializer.data,
                         message="Employee updated successfully"
                     )
+                print(serializer.errors)
                 return CustomResponse.error(
                     errors=serializer.errors,
                     message="Failed to update employee"
@@ -143,6 +144,9 @@ class EmployeeDeleteView(APIView):
             with transaction.atomic():
                 employee = Employee.objects.select_for_update().get(id=pk)
                 employee.delete()
-                return CustomResponse.no_content(message="Employee deleted successfully")
+                return CustomResponse.success(
+                data=None,
+                message="Employee deleted successfully"
+            )
         except Employee.DoesNotExist:
             return CustomResponse.not_found(message="Employee not found")

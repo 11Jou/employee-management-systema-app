@@ -8,12 +8,21 @@ export interface Column<T = Record<string, unknown>> {
     headerClassName?: string;
 }
 
+export interface TableAction<T = Record<string, unknown>> {
+    label: string;
+    onClick: (row: T, index: number) => void;
+    className?: string;
+    variant?: 'primary' | 'secondary' | 'danger';
+}
+
 interface TableProps<T = Record<string, unknown>> {
     columns: Column<T>[];
     data: T[];
     className?: string;
     emptyMessage?: string;
     loading?: boolean;
+    actions?: TableAction<T>[];
+    actionsHeader?: string;
 }
 
 export default function Table<T = Record<string, unknown>>({
@@ -22,6 +31,8 @@ export default function Table<T = Record<string, unknown>>({
     className = "",
     emptyMessage = "No data available",
     loading = false,
+    actions = [],
+    actionsHeader = "Actions",
 }: TableProps<T>) {
     if (loading) {
         return (
@@ -54,6 +65,11 @@ export default function Table<T = Record<string, unknown>>({
                                 {column.header}
                             </th>
                         ))}
+                        {actions.length > 0 && (
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200">
+                                {actionsHeader}
+                            </th>
+                        )}
                     </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -77,6 +93,34 @@ export default function Table<T = Record<string, unknown>>({
                                     </td>
                                 );
                             })}
+                            {actions.length > 0 && (
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <div className="flex items-center gap-2">
+                                        {actions.map((action, actionIndex) => {
+                                            const getButtonClass = () => {
+                                                const baseClass = "px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer";
+                                                const variantClass = 
+                                                    action.variant === 'danger' 
+                                                        ? "bg-red-100 text-red-700 hover:bg-red-200"
+                                                        : action.variant === 'secondary'
+                                                        ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                        : "bg-blue-100 text-blue-700 hover:bg-blue-200";
+                                                return `${baseClass} ${variantClass} ${action.className || ""}`;
+                                            };
+                                            
+                                            return (
+                                                <button
+                                                    key={actionIndex}
+                                                    onClick={() => action.onClick(row, rowIndex)}
+                                                    className={getButtonClass()}
+                                                >
+                                                    {action.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>

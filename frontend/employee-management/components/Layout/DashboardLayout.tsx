@@ -7,11 +7,20 @@ import { AuthService } from "../../services/HttpClient";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-
-  const userName = AuthService.getUserName();
-  const userRole = AuthService.getUserRole();
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    const loadUserData = () => {
+      if (typeof window !== "undefined") {
+        setUserName(AuthService.getUserName());
+        setUserRole(AuthService.getUserRole());
+      }
+    };
+    
+    // Defer to next tick to avoid hydration issues
+    const timeoutId = setTimeout(loadUserData, 0);
+
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
@@ -22,7 +31,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     window.addEventListener('resize', checkScreenSize);
 
-    return () => window.removeEventListener('resize', checkScreenSize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkScreenSize);
+    };
   }, []);
 
   const toggleSidebar = () => {
@@ -70,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
 
         <div className="flex items-center w-full justify-end">
-            <Avatar name={userName || 'Admin User'} title={userRole || 'Administrator'} />
+            <Avatar name={userName || ''} title={userRole || ''} />
           </div>
         </div>
         

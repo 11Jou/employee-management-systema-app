@@ -1,9 +1,10 @@
-import Table, { Column } from "@/components/Table";
+import Table, { Column, TableAction } from "@/components/Table";
 import { useState } from "react";
 import { HttpClient } from "@/services/HttpClient";
 import { useEffect } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
+import { useRouter } from "next/router";
 
 interface Company {
 
@@ -21,10 +22,20 @@ const columns: Column<Company>[] = [
 ];
 
 export default function CompaniesIndex() {
+    const router = useRouter();
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const actions: TableAction<Company>[] = [
+        {
+            label: "View",
+            onClick: (row) => {
+                router.push(`/dashboard/companies/${row.id}`);
+            },
+            variant: "primary",
+        },
+    ];
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -39,11 +50,19 @@ export default function CompaniesIndex() {
         };
         fetchCompanies();
     }, []);
+
     return (
         <>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
-            {companies.length > 0 && <Table columns={columns} data={companies} />}
+            {companies.length > 0 && (
+                <Table 
+                    columns={columns} 
+                    data={companies} 
+                    actions={actions}
+                    actionsHeader="Actions"
+                />
+            )}
         </>
     );
 }
