@@ -1,10 +1,15 @@
 import SideBar from "./SideBar";
 import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
+import Avatar from "./Avatar";
+import { AuthService } from "../../services/HttpClient";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  const userName = AuthService.getUserName();
+  const userRole = AuthService.getUserRole();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -60,9 +65,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 aria-label="Toggle menu">
                 <Menu className="text-white" size={20} />
               </button>
-              <span className="text-lg font-semibold text-[#1A2530]">Localucci</span>
+              <span className="text-lg font-semibold text-[#1A2530]">Dashboard</span>
             </div>
           )}
+
+        <div className="flex items-center w-full justify-end">
+            <Avatar name={userName || 'Admin User'} title={userRole || 'Administrator'} />
+          </div>
         </div>
         
         <div 
