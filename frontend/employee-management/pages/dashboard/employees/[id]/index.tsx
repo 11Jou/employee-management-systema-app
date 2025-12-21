@@ -4,6 +4,7 @@ import { HttpClient } from "@/services/HttpClient";
 import Show, { ShowField } from "@/components/Show";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
+import Head from "next/head";
 
 
 interface Company {
@@ -67,6 +68,9 @@ export default function EmployeeDetail() {
     }, [router.query.id]);
     return (
         <>
+            <Head>
+                <title>Employee Management - Employee Details</title>
+            </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
             {employee && <Show data={employee as unknown as Record<string, unknown>} fields={fields} title="Employee Details" />}

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 interface Company {
 
@@ -53,6 +54,9 @@ export default function CompaniesIndex() {
 
     return (
         <>
+            <Head>
+                <title>Employee Management - Companies</title>
+            </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
             {companies.length > 0 && (

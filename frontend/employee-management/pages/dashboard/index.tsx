@@ -3,6 +3,7 @@ import HttpClient from "../../services/HttpClient";
 import Counter from "@/components/Counter";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
+import Head from "next/head";
 
 interface Dashboard {
     total_companies: number;
@@ -30,6 +31,9 @@ export default function Dashboard() {
     }, []);
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Head>
+                <title>Employee Management - Dashboard</title>
+            </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
             {dashboard && <Counter title="Total Companies" value={dashboard.total_companies} color="bg-blue-500" textColor="text-white" />}

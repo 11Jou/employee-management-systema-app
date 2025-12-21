@@ -5,6 +5,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
 import { TableAction } from "@/components/Table";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 
 interface Department {
@@ -50,6 +51,9 @@ export default function DepartmentsIndex() {
 
     return (
         <>
+            <Head>
+                <title>Employee Management - Departments</title>
+            </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
             {departments.length > 0 && <Table columns={columns} data={departments} actions={actions} actionsHeader="Actions" />}

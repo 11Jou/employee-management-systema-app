@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { AuthService } from "../services/HttpClient";
+import Head from "next/head";
 
 export default function Index() {
     const router = useRouter();
@@ -43,6 +44,9 @@ export default function Index() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 py-12">
+            <Head>
+                <title>Employee Management - Login</title>
+            </Head>
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">

@@ -4,6 +4,7 @@ import { HttpClient } from "@/services/HttpClient";
 import Show, { ShowField } from "@/components/Show";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Error from "@/components/Error";
+import Head from "next/head";
 
 interface Company {
   id: number;
@@ -43,6 +44,9 @@ const router = useRouter();
 
   return (
     <>
+      <Head>
+        <title>Employee Management - Company Details</title>
+      </Head>
       {loading && <LoadingSpinner />}
       {error && <Error message={error} />}
       {company && <Show data={company as unknown as Record<string, unknown>} fields={fields} title="Company Details" />}

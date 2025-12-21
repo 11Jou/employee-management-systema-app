@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import Error from '@/components/Error';
 import { useRouter } from 'next/router';
 import ConfirmDelete from '@/components/ConfirmDelete';
+import Head from 'next/head';
 
 interface Employee {
     id: number;
@@ -52,7 +53,6 @@ export default function EmployeesIndex() {
             if (response.data.success) {
                 setShowConfirmDelete(false);
                 setEmployeeId(null);
-                // Refresh the employee list
                 const fetchResponse = await HttpClient.get('management/employees/');
                 if (fetchResponse.data.success) {
                     setEmployees(fetchResponse.data.data);
@@ -112,7 +112,16 @@ export default function EmployeesIndex() {
         fetchEmployees();
     }, []);
     return (
-        <>
+        <div className="flex flex-col gap-4">
+            <Head>
+                <title>Employee Management - Employees</title>
+            </Head>
+                <button
+                className="self-end w-fit bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md cursor-pointer"
+                onClick={() => router.push('/dashboard/employees/create')}
+                >
+                New Employee
+                </button>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
             {employees.length > 0 && <Table columns={columns} data={employees} actions={actions} actionsHeader="Actions" />}
@@ -128,6 +137,6 @@ export default function EmployeesIndex() {
                 loading={deleting}
                 error={deleteError}
             />
-        </>
+        </div>
     );
 }
