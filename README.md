@@ -26,6 +26,8 @@
    ```bash
    docker-compose up --build
 4. Open in broswer : http://localhost:3000/
+5. username : admin@gmail.com - password : admin@1234 (Admin privilege account)
+6. username : manager@gmail.com - password : test@1234 (manager privilege account)
 
 ---
 
