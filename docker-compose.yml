@@ -11,46 +11,25 @@ services:
       - .:/usr/src/app
     env_file:
       - .env
-
-    depends_on:
-      mysql:
-        condition: service_healthy
     networks:
       - app_network
     restart: always
 
-  mysql:
-    image: mysql:latest
-    container_name: employee_management_system_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mysqladmin",
-          "ping",
-          "-h",
-          "localhost",
-          "-u",
-          "root",
-          "-p${DB_PASSWORD}",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+  frontend:
+    build:
+      context: ./frontend/employee-management
+      dockerfile: Dockerfile
+    container_name: employee_management_system_frontend
     ports:
-      - "3307:3306"
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     networks:
       - app_network
-
-volumes:
-  mysql_data:
+    depends_on:
+      - django
+    restart: unless-stopped
 
 networks:
   app_network:

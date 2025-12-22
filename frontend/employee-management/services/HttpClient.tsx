@@ -203,10 +203,16 @@ export const AuthService = {
 
             const { access, refresh, name, role } = response.data;
 
-            // Store tokens
+            const userRole = role?.toLowerCase();
+            if (!userRole || (userRole !== 'admin' && userRole !== 'manager')) {
+                return {
+                    success: false,
+                    error: "Access denied. Only administrators and managers can access this system.",
+                };
+            }
+
             TokenManager.setTokens(access, refresh);
 
-            // Store user info (name and role) if available
             if (name && role) {
                 TokenManager.setUserInfo(name, role);
             }

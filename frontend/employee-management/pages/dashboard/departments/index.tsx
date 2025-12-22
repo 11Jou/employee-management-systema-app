@@ -25,6 +25,12 @@ export default function DepartmentsIndex() {
     const [departments, setDepartments] = useState<Department[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState<{
+        count: number;
+        next: string | null;
+        previous: string | null;
+    } | null>(null);
 
     const actions: TableAction<Department>[] = [
         {
@@ -38,16 +44,40 @@ export default function DepartmentsIndex() {
 
     useEffect(() => {
         const fetchDepartments = async () => {
-            const response = await HttpClient.get('management/departments/');
-            if (response.data.success) {
-                setDepartments(response.data.data);
-            } else {
-                setError(response.data.message);
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await HttpClient.get(`management/departments/?page=${currentPage}`);
+                if (response.data.success) {
+                    const data = response.data.data;
+                    // Handle paginated response
+                    if (data.results) {
+                        setDepartments(data.results);
+                        setPagination({
+                            count: data.count || 0,
+                            next: data.next,
+                            previous: data.previous,
+                        });
+                    } else {
+                        // Fallback for non-paginated response
+                        setDepartments(Array.isArray(data) ? data : []);
+                        setPagination(null);
+                    }
+                } else {
+                    setError(response.data.message);
+                }
+            } catch {
+                setError('Failed to fetch departments');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         fetchDepartments();
-    }, []);
+    }, [currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     return (
         <>
@@ -56,7 +86,20 @@ export default function DepartmentsIndex() {
             </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
-            {departments.length > 0 && <Table columns={columns} data={departments} actions={actions} actionsHeader="Actions" />}
+            {departments && (
+                <Table 
+                    columns={columns} 
+                    data={departments} 
+                    actions={actions} 
+                    actionsHeader="Actions"
+                    pagination={pagination ? {
+                        ...pagination,
+                        currentPage,
+                        totalPages: pagination ? Math.ceil(pagination.count / 10) : 0,
+                    } : undefined}
+                    onPageChange={handlePageChange}
+                />
+            )}
         </>
     );
 }

@@ -1,5 +1,5 @@
 import Table, { Column, TableAction } from '@/components/Table';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { HttpClient } from '@/services/HttpClient';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Error from '@/components/Error';
@@ -10,7 +10,6 @@ import Head from 'next/head';
 interface Employee {
     id: number;
     employee_name: string;
-    company: string;
     hired_date: string;
     status: string;
     designation: string;
@@ -29,6 +28,12 @@ export default function EmployeesIndex() {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState<{
+        count: number;
+        next: string | null;
+        previous: string | null;
+    } | null>(null);
 
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [employeeId, setEmployeeId] = useState<number | null>(null);
@@ -40,6 +45,36 @@ export default function EmployeesIndex() {
         setEmployeeId(id);
         setDeleteError(null);
     };
+
+    const fetchEmployees = useCallback(async (page: number) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await HttpClient.get(`management/employees/?page=${page}`);
+            if (response.data.success) {
+                const data = response.data.data;
+                // Handle paginated response
+                if (data.results) {
+                    setEmployees(data.results);
+                    setPagination({
+                        count: data.count || 0,
+                        next: data.next,
+                        previous: data.previous,
+                    });
+                } else {
+                    // Fallback for non-paginated response
+                    setEmployees(Array.isArray(data) ? data : []);
+                    setPagination(null);
+                }
+            } else {
+                setError(response.data.message);
+            }
+        } catch {
+            setError('Failed to fetch employees');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     const handleConfirmDelete = async () => {
         if (!employeeId) return;
@@ -53,10 +88,7 @@ export default function EmployeesIndex() {
             if (response.data.success) {
                 setShowConfirmDelete(false);
                 setEmployeeId(null);
-                const fetchResponse = await HttpClient.get('management/employees/');
-                if (fetchResponse.data.success) {
-                    setEmployees(fetchResponse.data.data);
-                }
+                await fetchEmployees(currentPage);
             } else {
                 setDeleteError(response.data.message || 'Failed to delete employee');
             }
@@ -99,18 +131,12 @@ export default function EmployeesIndex() {
         },
     ];
     useEffect(() => {
-        const fetchEmployees = async () => {
-            setLoading(true);
-            const response = await HttpClient.get('management/employees/');
-            if (response.data.success) {
-                setEmployees(response.data.data);
-            } else {
-                setError(response.data.message);
-            }
-            setLoading(false);
-        };
-        fetchEmployees();
-    }, []);
+        fetchEmployees(currentPage);
+    }, [currentPage, fetchEmployees]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
     return (
         <div className="flex flex-col gap-4">
             <Head>
@@ -124,7 +150,20 @@ export default function EmployeesIndex() {
                 </button>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
-            {employees.length > 0 && <Table columns={columns} data={employees} actions={actions} actionsHeader="Actions" />}
+            {employees && (
+                <Table 
+                    columns={columns} 
+                    data={employees} 
+                    actions={actions} 
+                    actionsHeader="Actions"
+                    pagination={pagination ? {
+                        ...pagination,
+                        currentPage,
+                        totalPages: pagination ? Math.ceil(pagination.count / 10) : 0,
+                    } : undefined}
+                    onPageChange={handlePageChange}
+                />
+            )}
             
             <ConfirmDelete
                 isOpen={showConfirmDelete}

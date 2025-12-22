@@ -44,12 +44,12 @@ export default function EmployeeCreate() {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const companiesResponse = await HttpClient.get('management/companies/');
+                const companiesResponse = await HttpClient.get('management/companies/all/');
                 if (companiesResponse.data.success) {
                     setCompanies(companiesResponse.data.data);
                 }
 
-                const departmentsResponse = await HttpClient.get('management/departments/');
+                const departmentsResponse = await HttpClient.get('management/departments/all/');
                 if (departmentsResponse.data.success) {
                     setDepartments(departmentsResponse.data.data);
                     setDepartmentsLoaded(true);

@@ -1,26 +1,22 @@
 import SideBar from "./SideBar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import Avatar from "./Avatar";
 import { AuthService } from "../../services/HttpClient";
 
+const subscribe = () => () => {};
+const getUserNameSnapshot = () => AuthService.getUserName();
+const getUserRoleSnapshot = () => AuthService.getUserRole();
+const getServerSnapshot = () => null;
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  const userName = useSyncExternalStore(subscribe, getUserNameSnapshot, getServerSnapshot);
+  const userRole = useSyncExternalStore(subscribe, getUserRoleSnapshot, getServerSnapshot);
 
   useEffect(() => {
-    const loadUserData = () => {
-      if (typeof window !== "undefined") {
-        setUserName(AuthService.getUserName());
-        setUserRole(AuthService.getUserRole());
-      }
-    };
-    
-    // Defer to next tick to avoid hydration issues
-    const timeoutId = setTimeout(loadUserData, 0);
-
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
@@ -32,7 +28,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('resize', checkScreenSize);
 
     return () => {
-      clearTimeout(timeoutId);
       window.removeEventListener('resize', checkScreenSize);
     };
   }, []);

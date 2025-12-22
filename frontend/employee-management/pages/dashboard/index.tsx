@@ -20,6 +20,7 @@ export default function Dashboard() {
         const fetchDashboard = async () => {
             setLoading(true);
             const response = await HttpClient.get('management/dashboard/');
+            console.log(response);
             if (response.data.success) {
                 setDashboard(response.data.data);
             } else {

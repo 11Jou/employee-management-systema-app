@@ -27,6 +27,12 @@ export default function CompaniesIndex() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pagination, setPagination] = useState<{
+        count: number;
+        next: string | null;
+        previous: string | null;
+    } | null>(null);
 
     const actions: TableAction<Company>[] = [
         {
@@ -41,16 +47,37 @@ export default function CompaniesIndex() {
     useEffect(() => {
         const fetchCompanies = async () => {
             setLoading(true);
-            const response = await HttpClient.get('management/companies/');
-            if (response.data.success) {
-                setCompanies(response.data.data);
-            } else {
-                setError(response.data.message);
+            setError(null);
+            try {
+                const response = await HttpClient.get(`management/companies/?page=${currentPage}`);
+                if (response.data.success) {
+                    const data = response.data.data;
+                    if (data.results) {
+                        setCompanies(data.results);
+                        setPagination({
+                            count: data.count || 0,
+                            next: data.next,
+                            previous: data.previous,
+                        });
+                    } else {
+                        setCompanies(Array.isArray(data) ? data : []);
+                        setPagination(null);
+                    }
+                } else {
+                    setError(response.data.message);
+                }
+            } catch {
+                setError('Failed to fetch companies');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         fetchCompanies();
-    }, []);
+    }, [currentPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
     return (
         <>
@@ -59,12 +86,18 @@ export default function CompaniesIndex() {
             </Head>
             {loading && <LoadingSpinner />}
             {error && <Error message={error} />}
-            {companies.length > 0 && (
+            {companies && (
                 <Table 
                     columns={columns} 
                     data={companies} 
                     actions={actions}
                     actionsHeader="Actions"
+                    pagination={pagination ? {
+                        ...pagination,
+                        currentPage,
+                        totalPages: pagination ? Math.ceil(pagination.count / 10) : 0,
+                    } : undefined}
+                    onPageChange={handlePageChange}
                 />
             )}
         </>

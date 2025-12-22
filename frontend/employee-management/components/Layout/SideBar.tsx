@@ -1,5 +1,10 @@
-import { House, Building2 ,LayoutPanelTop,  LogOut, Menu, User} from 'lucide-react';
-    import { AuthService } from '../../services/HttpClient';
+'use client';
+
+
+import { House, Building2 ,LayoutPanelTop,  LogOut, Menu, User, CircleUserRound} from 'lucide-react';
+import { AuthService } from '../../services/HttpClient';
+import { useSyncExternalStore } from 'react';
+
   
   import Link from 'next/link';
   import { LucideIcon } from 'lucide-react';
@@ -16,13 +21,30 @@ import { House, Building2 ,LayoutPanelTop,  LogOut, Menu, User} from 'lucide-rea
     isMobile?: boolean;
   }
   
+  const subscribe = () => () => {};
+  const getSnapshot = () => AuthService.getUserRole();
+  const getServerSnapshot = () => null;
+
   export default function SideBar({ isOpen, onToggle, isMobile = false }: SideBarProps) {
-    const menuItems: MenuItem[] = [
+
+    const userRole = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    
+
+    const menuItemsAdmin: MenuItem[] = [
       { icon: House, title: "Dashboard", href: "/dashboard" },
       { icon: Building2 , title: "Companies", href: "/dashboard/companies" },
       { icon: LayoutPanelTop, title: "Departments", href: "/dashboard/departments" },
       { icon: User, title: "Employees", href: "/dashboard/employees" },
+      { icon: User, title: "Hired Employees", href: "/dashboard/hired-employees" },
+      { icon: CircleUserRound, title: "User Accounts", href: "/dashboard/user-accounts" },
 
+    ];
+    const menuItemsManager: MenuItem[] =[
+      { icon: House, title: "Dashboard", href: "/dashboard" },
+      { icon: Building2 , title: "Companies", href: "/dashboard/companies" },
+      { icon: LayoutPanelTop, title: "Departments", href: "/dashboard/departments" },
+      { icon: User, title: "Employees", href: "/dashboard/employees" },
+      { icon: User, title: "Hired Employees", href: "/dashboard/hired-employees" },
     ];
   
     return (
@@ -50,7 +72,7 @@ import { House, Building2 ,LayoutPanelTop,  LogOut, Menu, User} from 'lucide-rea
         </div>
   
         <div className="flex flex-col flex-1 gap-2">
-          {menuItems.map((item, index) => {
+          {(userRole === 'admin' ? menuItemsAdmin : menuItemsManager).map((item, index) => {
             const Icon = item.icon;
   
             return (

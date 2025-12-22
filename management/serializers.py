@@ -3,6 +3,12 @@ from .models import *
 from authentication.models import User, UserRole
 
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'role', 'date_joined']
+
         
 class DepartmentSerializer(serializers.ModelSerializer):
     number_of_employee = serializers.SerializerMethodField()
@@ -42,7 +48,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = '__all__'
         
-class EmployeeUpdateSerializer(serializers.ModelSerializer):
+class EmployeeUpdateCreateSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         """

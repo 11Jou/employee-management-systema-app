@@ -15,6 +15,14 @@ export interface TableAction<T = Record<string, unknown>> {
     variant?: 'primary' | 'secondary' | 'danger';
 }
 
+interface PaginationInfo {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    currentPage?: number;
+    totalPages?: number;
+}
+
 interface TableProps<T = Record<string, unknown>> {
     columns: Column<T>[];
     data: T[];
@@ -23,6 +31,8 @@ interface TableProps<T = Record<string, unknown>> {
     loading?: boolean;
     actions?: TableAction<T>[];
     actionsHeader?: string;
+    pagination?: PaginationInfo;
+    onPageChange?: (page: number) => void;
 }
 
 export default function Table<T = Record<string, unknown>>({
@@ -33,6 +43,8 @@ export default function Table<T = Record<string, unknown>>({
     loading = false,
     actions = [],
     actionsHeader = "Actions",
+    pagination,
+    onPageChange,
 }: TableProps<T>) {
     if (loading) {
         return (
@@ -50,9 +62,36 @@ export default function Table<T = Record<string, unknown>>({
         );
     }
 
+    const pageSize = 10;
+    const totalPages = pagination ? Math.ceil(pagination.count / pageSize) : 0;
+    let currentPage = pagination?.currentPage;
+    
+    if (pagination && !currentPage) {
+        if (pagination.previous) {
+            try {
+                const url = new URL(pagination.previous);
+                const prevPage = url.searchParams.get('page');
+                currentPage = prevPage ? parseInt(prevPage) + 1 : 1;
+            } catch {
+                currentPage = 1;
+            }
+        } else if (pagination.next) {
+            try {
+                const url = new URL(pagination.next);
+                const nextPage = url.searchParams.get('page');
+                currentPage = nextPage ? parseInt(nextPage) - 1 : 1;
+            } catch {
+                currentPage = 1;
+            }
+        } else {
+            currentPage = pagination.count > 0 ? 1 : 0;
+        }
+    }
+
     return (
-        <div className={`overflow-x-auto rounded-lg border border-gray-200 ${className}`}>
-            <table className="w-full border-collapse bg-white">
+        <div className={`rounded-lg border border-gray-200 w-full ${className}`}>
+            <div className="overflow-x-auto">
+                <table className="border-collapse bg-white" style={{ width: '100%', minWidth: 'max-content' }}>
                 <thead className="bg-gray-50">
                     <tr>
                         {columns.map((column) => (
@@ -125,6 +164,93 @@ export default function Table<T = Record<string, unknown>>({
                     ))}
                 </tbody>
             </table>
+            </div>
+            {pagination && pagination.count > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+                    <div className="text-sm text-gray-700">
+                        Showing <span className="font-medium">{data.length}</span> of{' '}
+                        <span className="font-medium">{pagination.count}</span> results
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => {
+                                if (pagination.previous && onPageChange && currentPage) {
+                                    onPageChange(currentPage - 1);
+                                }
+                            }}
+                            disabled={!pagination.previous}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                                pagination.previous
+                                    ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 cursor-pointer'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                            Previous
+                        </button>
+                        <div className="flex items-center gap-1">
+                            {currentPage && totalPages > 0 && (() => {
+                                const pages = [];
+                                
+                                // Show first page
+                                if (currentPage > 2) {
+                                    pages.push(1);
+                                    if (currentPage > 3) pages.push('ellipsis-start');
+                                }
+                                
+                                // Show pages around current page
+                                for (let i = Math.max(1, currentPage - 1); i <= Math.min(totalPages, currentPage + 1); i++) {
+                                    pages.push(i);
+                                }
+                                
+                                // Show last page
+                                if (currentPage < totalPages - 1) {
+                                    if (currentPage < totalPages - 2) pages.push('ellipsis-end');
+                                    pages.push(totalPages);
+                                }
+                                
+                                return pages.map((page, idx) => {
+                                    if (page === 'ellipsis-start' || page === 'ellipsis-end') {
+                                        return (
+                                            <span key={`ellipsis-${idx}`} className="px-2 text-gray-500">
+                                                ...
+                                            </span>
+                                        );
+                                    }
+                                    const pageNum = page as number;
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => onPageChange && onPageChange(pageNum)}
+                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                                                pageNum === currentPage
+                                                    ? 'bg-blue-600 text-white cursor-pointer'
+                                                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 cursor-pointer'
+                                            }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                });
+                            })()}
+                        </div>
+                        <button
+                            onClick={() => {
+                                if (pagination.next && onPageChange && currentPage) {
+                                    onPageChange(currentPage + 1);
+                                }
+                            }}
+                            disabled={!pagination.next}
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                                pagination.next
+                                    ? 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 cursor-pointer'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

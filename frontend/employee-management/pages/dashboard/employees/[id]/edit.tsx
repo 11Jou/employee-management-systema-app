@@ -107,13 +107,13 @@ export default function EmployeeEdit() {
           setError(employeeResponse.data.message);
         }
 
-        const companiesResponse = await HttpClient.get("management/companies/");
+        const companiesResponse = await HttpClient.get("management/companies/all/");
         if (companiesResponse.data.success) {
           setCompanies(companiesResponse.data.data);
         }
 
         const departmentsResponse = await HttpClient.get(
-          "management/departments/"
+          "management/departments/all/"
         );
         if (departmentsResponse.data.success) {
           setDepartments(departmentsResponse.data.data);
