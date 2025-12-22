@@ -22,8 +22,10 @@
    ```bash
    git clone https://github.com/11Jou/employee-management-systema-app.git
    cd employee-management-systema-app
-2. run docker-compose up --build
-3. Open in broswer : http://localhost:3000/
+2. run this command
+   ```bash
+   docker-compose up --build
+4. Open in broswer : http://localhost:3000/
 
 ---
 
