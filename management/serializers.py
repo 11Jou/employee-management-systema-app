@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import *
 from authentication.models import User, UserRole
+import re
+from django.core.validators import validate_email
 
 
 
@@ -65,6 +67,17 @@ class EmployeeUpdateCreateSerializer(serializers.ModelSerializer):
                 })
         
         return attrs
+    
+    def validate_phone_number(self, value):
+        if not re.match(r'^\+?1?\d{8,15}$', value):
+            raise serializers.ValidationError('Invalid phone number')
+        return value
+    
+    
+    def validate_email(self, value):
+        if not validate_email(value):
+            raise serializers.ValidationError('Invalid email address')
+        return value
     
     class Meta:
         model = Employee

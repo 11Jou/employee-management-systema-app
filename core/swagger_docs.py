@@ -3,7 +3,7 @@ Swagger/OpenAPI documentation schemas for Management API endpoints.
 """
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from management.serializers import EmployeeSerializer
+from management.serializers import EmployeeUpdateCreateSerializer
 
 
 # Swagger decorators for Employee endpoints
@@ -11,7 +11,7 @@ from management.serializers import EmployeeSerializer
 employee_create_schema = swagger_auto_schema(
     operation_summary="Create a new employee",
     operation_description="Create a new employee. The department must belong to the specified company.",
-    request_body=EmployeeSerializer,
+    request_body=EmployeeUpdateCreateSerializer,
     responses={
         201: openapi.Response(description="Employee created successfully"),
         400: openapi.Response(description="Validation error"),
@@ -22,7 +22,7 @@ employee_create_schema = swagger_auto_schema(
 employee_update_schema = swagger_auto_schema(
     operation_summary="Update an existing employee",
     operation_description="Update an existing employee by ID. Partial updates are supported.",
-    request_body=EmployeeSerializer,
+    request_body=EmployeeUpdateCreateSerializer,
     responses={
         200: openapi.Response(description="Employee updated successfully"),
         400: openapi.Response(description="Validation error"),
